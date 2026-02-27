@@ -2,41 +2,40 @@ export interface ColoringPage {
   id: string;
   title: string;
   category: Category;
-  thumbnail: string;
-  svgPaths: SvgPathItem[];
+  /** require() で読み込む画像ソース */
+  image: number;
   difficulty: 'easy' | 'medium' | 'hard';
   isNew?: boolean;
   isPremium?: boolean;
 }
 
-export interface SvgPathItem {
+export interface BrushStroke {
   id: string;
-  d: string;
-  defaultFill: string;
-  stroke: string;
-  strokeWidth: number;
-  fillRule?: 'nonzero' | 'evenodd';
-}
-
-export interface ColoredPath {
-  pathId: string;
+  points: { x: number; y: number }[];
   color: string;
+  size: number;
 }
 
 export interface CompletedWork {
   id: string;
   pageId: string;
   pageTitle: string;
-  coloredPaths: ColoredPath[];
+  imageUri: string;
   createdAt: Date;
-  imageUri?: string;
 }
 
-export type Category = 'animals' | 'nature' | 'mandala' | 'food' | 'vehicles' | 'fantasy';
+export type Category =
+  | 'animals'
+  | 'nature'
+  | 'mandala'
+  | 'food'
+  | 'vehicles'
+  | 'fantasy'
+  | 'other';
 
 export interface ToolState {
   selectedColor: string;
-  tool: 'fill' | 'brush' | 'eraser';
+  tool: 'brush' | 'eraser';
   brushSize: number;
 }
 

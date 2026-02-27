@@ -2,108 +2,122 @@
 
 App Store向けの塗り絵アプリです。React Native (TypeScript) で開発されています。
 
+---
+
+## 🖼️ 塗り絵画像の追加方法
+
+### ステップ1: 画像ファイルを配置する
+
+```
+src/assets/coloringPages/
+├── safari_lion.png      ← ここに置く
+├── ocean_whale.png
+└── butterfly.png
+```
+
+### ステップ2: `src/data/coloringPages.ts` に登録する
+
+```ts
+export const COLORING_PAGES: ColoringPage[] = [
+  {
+    id: 'safari_lion',           // 一意なID
+    title: 'サファリのライオン',    // 表示タイトル
+    category: 'animals',         // カテゴリ（下記参照）
+    image: require('../assets/coloringPages/safari_lion.png'),
+    difficulty: 'medium',        // 'easy' | 'medium' | 'hard'
+    isNew: true,                 // NEW バッジ（任意）
+  },
+  {
+    id: 'ocean_whale',
+    title: '海のくじら',
+    category: 'nature',
+    image: require('../assets/coloringPages/ocean_whale.png'),
+    difficulty: 'easy',
+  },
+];
+```
+
+### カテゴリ一覧
+
+| category | 表示名 |
+|----------|--------|
+| `animals` | どうぶつ |
+| `nature` | しぜん |
+| `mandala` | マンダラ |
+| `food` | たべもの |
+| `vehicles` | のりもの |
+| `fantasy` | ファンタジー |
+| `other` | その他 |
+
+### 画像ファイルのガイドライン
+
+- **サイズ**: 1000×1000px 以上推奨（正方形が最適）
+- **形式**: PNG（透過背景可）または JPEG
+- **背景**: 白または透明
+- **線の太さ**: 太め（3px以上）が塗り絵として見やすい
+- **線の色**: 黒（#000000）が最も見やすい
+
+---
+
 ## 機能
 
-- **塗りつぶしツール** 🪣 - タップしたエリアを選んだ色で塗る
-- **ブラシツール** 🖌️ - 自由に書き込み（4段階のサイズ調整）
-- **消しゴムツール** 🧹 - ブラシで書いた部分を消せる
-- **カラーパレット** - 40色以上から選択可能（肌の色も対応）
-- **アンドゥ/リドゥ** ↩️↪️ - 最大50ステップまで履歴管理
-- **保存機能** 💾 - 完成した作品をフォトライブラリに保存
-- **クリア** 🗑️ - やり直しができる
+| 機能 | 説明 |
+|------|------|
+| 🖌️ ブラシ | 指でなぞって色を塗る |
+| 🧹 消しゴム | 塗った部分を消す |
+| 🎨 カラーパレット | 40色以上 ＋ 肌の色6色 |
+| ↩️↪️ アンドゥ/リドゥ | 最大50ステップの履歴 |
+| 💾 保存 | フォトライブラリに保存 |
+| 🗑️ クリア | 全部消してやり直し |
 
-## 収録塗り絵（6枚）
-
-| タイトル | カテゴリ | 難易度 |
-|---------|---------|-------|
-| かわいいネコ | どうぶつ | かんたん |
-| きれいなお花 | しぜん | かんたん |
-| マンダラ - 蓮 | マンダラ | むずかしい |
-| チョウチョ | どうぶつ | ふつう |
-| おうち | のりもの・たてもの | かんたん |
-| 星空 | しぜん | ふつう |
+---
 
 ## セットアップ
 
-### 必要な環境
-
-- Node.js 18+
-- Xcode 15+ (iOS開発)
-- CocoaPods
-- React Native CLI
-
-### インストール
-
 ```bash
-# 依存関係をインストール
+# 依存関係インストール
 npm install
 
-# iOS向けのPodをインストール
+# iOS用 Pods インストール (Mac必須)
 cd ios && pod install && cd ..
-```
 
-### 実行
-
-```bash
-# Metro バンドラーを起動
-npm start
-
-# iOS シミュレータで起動
+# 起動
 npm run ios
-
-# Android エミュレータで起動
-npm run android
 ```
 
-## 技術スタック
-
-- **React Native** 0.73
-- **TypeScript** 5.0
-- **react-native-svg** - SVGベースの塗り絵レンダリング
-- **react-navigation** - 画面遷移
-- **react-native-gesture-handler** - タッチ操作
-- **react-native-view-shot** - 画面キャプチャ・保存
-- **@react-native-camera-roll/camera-roll** - フォトライブラリアクセス
+---
 
 ## アーキテクチャ
 
 ```
 src/
+├── assets/coloringPages/   ← 塗り絵 PNG/JPG をここに追加
 ├── components/
-│   ├── ColorPalette.tsx    # カラーパレット（クイック＋フルパレット）
-│   ├── ColoringCanvas.tsx  # メインキャンバス（SVG描画）
+│   ├── ColorPalette.tsx    # カラーパレット
+│   ├── ColoringCanvas.tsx  # キャンバス（画像 + SVG描画レイヤー）
 │   ├── PageCard.tsx        # ホーム画面のカード
-│   └── ToolBar.tsx         # ツールバー（塗り・ブラシ・消しゴム等）
+│   └── ToolBar.tsx         # ツールバー
 ├── data/
-│   ├── colors.ts           # カラーパレットデータ
-│   └── coloringPages.ts    # 塗り絵ページデータ（SVGパス）
+│   ├── colors.ts           # カラーデータ
+│   └── coloringPages.ts    ← 塗り絵を追加する場所
 ├── hooks/
-│   └── useColoringState.ts # 塗り絵状態管理（アンドゥ履歴）
+│   └── useColoringState.ts # ブラシ履歴管理
 ├── screens/
-│   ├── HomeScreen.tsx      # ホーム（塗り絵一覧）
-│   ├── ColoringScreen.tsx  # 塗り絵画面
-│   └── GalleryScreen.tsx   # 保存した作品一覧
-└── types/
-    └── index.ts            # TypeScript型定義
+│   ├── HomeScreen.tsx
+│   ├── ColoringScreen.tsx
+│   └── GalleryScreen.tsx
+└── types/index.ts
 ```
 
-## App Store 申請に向けて
+---
 
-申請前に以下を準備してください：
+## App Store 申請チェックリスト
 
-1. **App ID** - Apple Developer アカウントで作成
-2. **証明書・プロビジョニングプロファイル** - Xcode で設定
-3. **アイコン** - 1024×1024px の `AppIcon.png`
-4. **スクリーンショット** - iPhone/iPad 各サイズ
-5. **プライバシーポリシー** - 写真ライブラリアクセスのため必要
-6. **年齢制限** - 4+ (全年齢対象)
-
-## 今後の拡張アイデア
-
-- [ ] 塗り絵の追加（食べ物・乗り物・ファンタジー）
-- [ ] カスタム写真からの塗り絵変換
-- [ ] オンラインギャラリー（SNSシェア）
-- [ ] アニメーションで塗る演出
-- [ ] スタンプ機能
-- [ ] BGM・効果音
-- [ ] 子ども向けモード（大きなパレット）
+- [ ] 画像を追加して動作確認
+- [ ] アプリアイコン (1024×1024px)
+- [ ] スクリーンショット (iPhone/iPad 各サイズ)
+- [ ] Bundle ID を Apple Developer で設定
+- [ ] 証明書・プロビジョニングプロファイルを設定
+- [ ] Info.plist の写真ライブラリ権限説明文を確認
+- [ ] App Store Connect でアプリ情報を入力
+- [ ] プライバシーポリシーURL を用意

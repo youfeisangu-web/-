@@ -3,10 +3,10 @@ import {
   TouchableOpacity,
   View,
   Text,
+  Image,
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import Svg, { Path, G } from 'react-native-svg';
 import { ColoringPage } from '../types';
 import { getCategoryLabel } from '../data/coloringPages';
 
@@ -17,8 +17,7 @@ interface PageCardProps {
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - 48) / 2;
-const CARD_HEIGHT = CARD_WIDTH + 44;
-const THUMB_SIZE = CARD_WIDTH - 24;
+const THUMB_SIZE = CARD_WIDTH - 0;
 
 const DIFFICULTY_LABELS: Record<string, string> = {
   easy: 'かんたん',
@@ -33,41 +32,18 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 };
 
 const PageCard: React.FC<PageCardProps> = ({ page, onPress }) => {
-  // Show first 8 paths as thumbnail preview
-  const previewPaths = page.svgPaths.slice(0, 12);
-
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={onPress}
       activeOpacity={0.85}>
-      {/* Thumbnail SVG Preview */}
+      {/* サムネイル */}
       <View style={styles.thumbnailContainer}>
-        <Svg
-          width={THUMB_SIZE}
-          height={THUMB_SIZE}
-          viewBox="0 0 300 300"
-          style={styles.thumbnail}>
-          <Path
-            d="M 0 0 L 300 0 L 300 300 L 0 300 Z"
-            fill="#FAFAFA"
-          />
-          <G>
-            {previewPaths.map(pathItem => (
-              <Path
-                key={pathItem.id}
-                d={pathItem.d}
-                fill={pathItem.defaultFill}
-                stroke={pathItem.stroke}
-                strokeWidth={pathItem.strokeWidth}
-                fillRule={pathItem.fillRule || 'nonzero'}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            ))}
-          </G>
-        </Svg>
-
+        <Image
+          source={page.image}
+          style={styles.thumbnail}
+          resizeMode="cover"
+        />
         {page.isNew && (
           <View style={styles.newBadge}>
             <Text style={styles.newBadgeText}>NEW</Text>
@@ -80,7 +56,7 @@ const PageCard: React.FC<PageCardProps> = ({ page, onPress }) => {
         )}
       </View>
 
-      {/* Card Info */}
+      {/* カード情報 */}
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={1}>
           {page.title}
@@ -121,13 +97,13 @@ const styles = StyleSheet.create({
   },
   thumbnailContainer: {
     position: 'relative',
-    alignItems: 'center',
-    paddingTop: 12,
-    paddingHorizontal: 12,
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
     backgroundColor: '#FAFAFA',
   },
   thumbnail: {
-    borderRadius: 8,
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
   },
   newBadge: {
     position: 'absolute',
@@ -160,13 +136,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   info: {
-    padding: 12,
+    padding: 10,
   },
   title: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: '#1C1C1E',
-    marginBottom: 6,
+    marginBottom: 5,
   },
   meta: {
     flexDirection: 'row',

@@ -6,9 +6,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
-  ScrollView,
   StatusBar,
-  Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RootStackParamList, ToolState } from '../types';
@@ -31,14 +29,12 @@ const ColoringScreen: React.FC = () => {
 
   const [toolState, setToolState] = useState<ToolState>({
     selectedColor: DEFAULT_COLOR,
-    tool: 'fill',
+    tool: 'brush',
     brushSize: 8,
   });
 
   const {
-    coloredPaths,
     brushStrokes,
-    colorPath,
     addBrushStroke,
     undo,
     redo,
@@ -110,21 +106,16 @@ const ColoringScreen: React.FC = () => {
         <View style={styles.headerRight} />
       </View>
 
-      {/* Canvas area */}
-      <ScrollView
-        style={styles.canvasScroll}
-        contentContainerStyle={styles.canvasContainer}
-        scrollEnabled={false}>
+      {/* キャンバスエリア */}
+      <View style={styles.canvasContainer}>
         <ColoringCanvas
           page={page}
           toolState={toolState}
-          coloredPaths={coloredPaths}
           brushStrokes={brushStrokes}
-          onPathColored={colorPath}
           onBrushStroke={addBrushStroke}
           viewRef={canvasViewRef}
         />
-      </ScrollView>
+      </View>
 
       {/* Tool Bar */}
       <ToolBar
@@ -182,14 +173,12 @@ const styles = StyleSheet.create({
   headerRight: {
     width: 60,
   },
-  canvasScroll: {
-    flex: 1,
-  },
   canvasContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
+    paddingVertical: 12,
+    backgroundColor: '#1C1C1E',
   },
   errorContainer: {
     flex: 1,

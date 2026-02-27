@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  Platform,
 } from 'react-native';
 import { ToolState } from '../types';
 
@@ -35,14 +34,8 @@ const ToolBar: React.FC<ToolBarProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      {/* Left group: Tools */}
+      {/* ツール選択 */}
       <View style={styles.group}>
-        <ToolButton
-          icon="🪣"
-          label="塗り"
-          active={toolState.tool === 'fill'}
-          onPress={() => onToolChange('fill')}
-        />
         <ToolButton
           icon="🖌️"
           label="ブラシ"
@@ -57,41 +50,37 @@ const ToolBar: React.FC<ToolBarProps> = ({
         />
       </View>
 
-      {/* Divider */}
       <View style={styles.divider} />
 
-      {/* Brush sizes (only when brush or eraser is active) */}
-      {toolState.tool !== 'fill' && (
-        <>
-          <View style={styles.brushSizes}>
-            {BRUSH_SIZES.map(size => (
-              <TouchableOpacity
-                key={size}
-                style={[
-                  styles.brushSizeButton,
-                  toolState.brushSize === size && styles.brushSizeActive,
-                ]}
-                onPress={() => onBrushSizeChange(size)}>
-                <View
-                  style={[
-                    styles.brushDot,
-                    {
-                      width: size,
-                      height: size,
-                      borderRadius: size / 2,
-                      backgroundColor:
-                        toolState.brushSize === size ? '#FFFFFF' : '#555555',
-                    },
-                  ]}
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-          <View style={styles.divider} />
-        </>
-      )}
+      {/* ブラシサイズ */}
+      <View style={styles.brushSizes}>
+        {BRUSH_SIZES.map(size => (
+          <TouchableOpacity
+            key={size}
+            style={[
+              styles.brushSizeButton,
+              toolState.brushSize === size && styles.brushSizeActive,
+            ]}
+            onPress={() => onBrushSizeChange(size)}>
+            <View
+              style={[
+                styles.brushDot,
+                {
+                  width: size,
+                  height: size,
+                  borderRadius: size / 2,
+                  backgroundColor:
+                    toolState.brushSize === size ? '#FFFFFF' : '#888888',
+                },
+              ]}
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
 
-      {/* Right group: History & Actions */}
+      <View style={styles.divider} />
+
+      {/* 履歴・アクション */}
       <View style={styles.group}>
         <ToolButton
           icon="↩️"

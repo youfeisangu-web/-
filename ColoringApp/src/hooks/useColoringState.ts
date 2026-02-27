@@ -1,36 +1,20 @@
 import { useState, useCallback } from 'react';
-import { ColoredPath } from '../types';
-import { DEFAULT_COLOR } from '../data/colors';
-
-interface BrushStroke {
-  id: string;
-  points: { x: number; y: number }[];
-  color: string;
-  size: number;
-}
-
-interface ColoringState {
-  coloredPaths: ColoredPath[];
-  brushStrokes: BrushStroke[];
-}
+import { BrushStroke } from '../types';
 
 const MAX_HISTORY = 50;
 
 export const useColoringState = () => {
-  const [history, setHistory] = useState<ColoringState[]>([
-    { coloredPaths: [], brushStrokes: [] },
-  ]);
+  // history は BrushStroke[][] (各スナップショットはストローク配列)
+  const [history, setHistory] = useState<BrushStroke[][]>([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
-  const currentState = history[historyIndex];
+  const currentStrokes = history[historyIndex];
 
   const pushState = useCallback(
-    (newState: ColoringState) => {
+    (newStrokes: BrushStroke[]) => {
       setHistory(prev => {
-        // Remove any future states (when undoing then doing new action)
         const truncated = prev.slice(0, historyIndex + 1);
-        const next = [...truncated, newState];
-        // Limit history length
+        const next = [...truncated, newStrokes];
         if (next.length > MAX_HISTORY) {
           next.shift();
           return next;
@@ -42,35 +26,11 @@ export const useColoringState = () => {
     [historyIndex],
   );
 
-  const colorPath = useCallback(
-    (pathId: string, color: string) => {
-      const existingIndex = currentState.coloredPaths.findIndex(
-        cp => cp.pathId === pathId,
-      );
-      let newColoredPaths: ColoredPath[];
-      if (existingIndex >= 0) {
-        newColoredPaths = currentState.coloredPaths.map(cp =>
-          cp.pathId === pathId ? { ...cp, color } : cp,
-        );
-      } else {
-        newColoredPaths = [...currentState.coloredPaths, { pathId, color }];
-      }
-      pushState({
-        ...currentState,
-        coloredPaths: newColoredPaths,
-      });
-    },
-    [currentState, pushState],
-  );
-
   const addBrushStroke = useCallback(
     (stroke: BrushStroke) => {
-      pushState({
-        ...currentState,
-        brushStrokes: [...currentState.brushStrokes, stroke],
-      });
+      pushState([...currentStrokes, stroke]);
     },
-    [currentState, pushState],
+    [currentStrokes, pushState],
   );
 
   const undo = useCallback(() => {
@@ -86,21 +46,16 @@ export const useColoringState = () => {
   }, [historyIndex, history.length]);
 
   const clear = useCallback(() => {
-    pushState({ coloredPaths: [], brushStrokes: [] });
+    pushState([]);
   }, [pushState]);
 
-  const canUndo = historyIndex > 0;
-  const canRedo = historyIndex < history.length - 1;
-
   return {
-    coloredPaths: currentState.coloredPaths,
-    brushStrokes: currentState.brushStrokes,
-    colorPath,
+    brushStrokes: currentStrokes,
     addBrushStroke,
     undo,
     redo,
     clear,
-    canUndo,
-    canRedo,
+    canUndo: historyIndex > 0,
+    canRedo: historyIndex < history.length - 1,
   };
 };
