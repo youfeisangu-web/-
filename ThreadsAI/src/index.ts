@@ -1,6 +1,7 @@
 import { config } from './config';
 import { startScheduler, runPost } from './scheduler/scheduler';
 import { ThreadsClient } from './threads/threadsClient';
+import { TwitterClient } from './twitter/twitterClient';
 import { generatePost } from './ai/contentGenerator';
 import { log } from './utils/logger';
 
@@ -9,7 +10,7 @@ async function main(): Promise<void> {
   const isDryRun = args.includes('--dry-run');
   const isPostNow = args.includes('--post-now');
 
-  log('info', '=== Threads自動運用AI 起動 ===');
+  log('info', '=== Threads & X 自動運用AI 起動 ===');
   log('info', `モデル: ${config.gemini.model}`);
   log('info', `トーン: ${config.posting.tone}`);
   log('info', `トピック: ${config.posting.topics.join(' / ')}`);
@@ -23,6 +24,19 @@ async function main(): Promise<void> {
   } catch {
     log('warn', 'Threads APIの疎通確認に失敗（.envの設定を確認してください）');
     if (!isDryRun) process.exit(1);
+  }
+
+  // X アカウント疎通確認（設定がある場合のみ）
+  if (config.twitter.enabled) {
+    try {
+      const twitter = new TwitterClient();
+      const profile = await twitter.getProfile();
+      log('info', `Xアカウント確認: @${profile.username}`);
+    } catch {
+      log('warn', 'X APIの疎通確認に失敗（X_API_KEY等の設定を確認してください）');
+    }
+  } else {
+    log('info', 'X投稿: 無効（X_API_KEY 等を .env に設定すると有効になります）');
   }
 
   if (isDryRun) {

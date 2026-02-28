@@ -2,9 +2,11 @@ import cron from 'node-cron';
 import { config } from '../config';
 import { generateBestPost } from '../ai/contentGenerator';
 import { ThreadsClient } from '../threads/threadsClient';
+import { TwitterClient } from '../twitter/twitterClient';
 import { log } from '../utils/logger';
 
 const threads = new ThreadsClient();
+const twitter = config.twitter.enabled ? new TwitterClient() : null;
 
 // 最近使ったトピックを記録してバリエーションを保つ
 const recentTopics: string[] = [];
@@ -29,13 +31,27 @@ export async function runPost(dryRun = false): Promise<void> {
       return;
     }
 
+    // Threads に投稿
     const postId = await threads.post(post);
-    log('info', `投稿完了 ✓  ID: ${postId}`);
+    log('info', `Threads 投稿完了 ✓  ID: ${postId}`);
 
     // Billia URL が設定されていればリプライで添付
     if (config.posting.billiaUrl) {
       await threads.reply(postId, config.posting.billiaUrl);
-      log('info', `リプライ完了 ✓  URL: ${config.posting.billiaUrl}`);
+      log('info', `Threads リプライ完了 ✓  URL: ${config.posting.billiaUrl}`);
+    }
+
+    // X (Twitter) が有効なら投稿
+    if (twitter) {
+      const xPost = await generateBestPost({ candidates: 3, platform: 'x' });
+      log('info', `X 投稿文:\n${'─'.repeat(40)}\n${xPost}\n${'─'.repeat(40)}`);
+      const tweetId = await twitter.post(xPost);
+      log('info', `X 投稿完了 ✓  ID: ${tweetId}`);
+
+      if (config.posting.billiaUrl) {
+        await twitter.reply(tweetId, config.posting.billiaUrl);
+        log('info', `X リプライ完了 ✓  URL: ${config.posting.billiaUrl}`);
+      }
     }
 
     // 直近のトピックを更新

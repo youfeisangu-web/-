@@ -7,6 +7,10 @@ function required(key: string): string {
   return val;
 }
 
+function optional(key: string): string {
+  return process.env[key] ?? '';
+}
+
 export const config = {
   gemini: {
     apiKey: required('GEMINI_API_KEY'),
@@ -16,6 +20,20 @@ export const config = {
     userId: required('THREADS_USER_ID'),
     accessToken: required('THREADS_ACCESS_TOKEN'),
     apiBase: 'https://graph.threads.net/v1.0',
+  },
+  twitter: {
+    apiKey: optional('X_API_KEY'),
+    apiSecret: optional('X_API_SECRET'),
+    accessToken: optional('X_ACCESS_TOKEN'),
+    accessTokenSecret: optional('X_ACCESS_TOKEN_SECRET'),
+    get enabled(): boolean {
+      return !!(
+        process.env.X_API_KEY &&
+        process.env.X_API_SECRET &&
+        process.env.X_ACCESS_TOKEN &&
+        process.env.X_ACCESS_TOKEN_SECRET
+      );
+    },
   },
   posting: {
     postsPerDay: parseInt(process.env.POSTS_PER_DAY ?? '3', 10),

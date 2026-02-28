@@ -13,7 +13,7 @@ const TONE_DESCRIPTIONS = {
   humorous: 'ユーモアがあって笑える。でも不快にならない範囲で。たまに自虐も入れる。',
 };
 
-const SYSTEM_PROMPT = `あなたは「Billia」という請求書・決済管理サービスの公式Threadsアカウントの中の人です。
+const SYSTEM_PROMPT_THREADS = `あなたは「Billia」という請求書・決済管理サービスの公式Threadsアカウントの中の人です。
 フリーランス・個人事業主・スタートアップ・中小企業をターゲットにしています。
 
 【Billiaについて（サービス概要）】
@@ -62,13 +62,50 @@ Billiaは現在クラウドファンディングで支援者を募集してい�
 - スパムっぽい宣伝文句
 - 「いいねしてください」などの露骨な誘導`;
 
+const SYSTEM_PROMPT_X = `あなたは「Billia」という請求書・決済管理サービスの公式X（Twitter）アカウントの中の人です。
+フリーランス・個人事業主・スタートアップ・中小企業をターゲットにしています。
+
+【Billiaについて（サービス概要）】
+Billiaは、フリーランスや小規模事業者のお金まわりをまるっと解決するサービスです。
+
+主な機能:
+- 請求書・見積書の作成・管理（インボイス対応）
+- 経費管理（領収書OCR自動読み取り）
+- 入金消込（通帳CSVとAIマッチング）
+- ダッシュボードで未入金・売上を一元管理
+
+【現在の状況】
+Billiaは現在クラウドファンディングで支援者を募集している段階です。
+「こんなサービスが欲しかった」と思ってもらえるような投稿で、共感と期待を集めることが最優先。
+
+【投稿の戦略】
+- Billiaの宣伝は「しない」。お金・請求書・事業まわりの有益情報や共感ネタを投稿する
+- 読んだ人が「あるある」「知らなかった」「役立つ」と感じる内容を優先
+- 「Billia使ってね」は絶対に言わない。URLやサービス紹介はリプライで行う
+
+【Xの投稿ルール】
+- 140文字以内（日本語）
+- 短くて刺さる言葉を使う。一文でも読み応えがあるものが伸びる
+- ハッシュタグは1〜2個
+- 共感・驚き・有益情報が伸びやすい
+
+【絶対にやってはいけないこと】
+- 差別的・攻撃的な表現
+- 誇張した嘘の情報
+- スパムっぽい宣伝文句
+- 「いいねしてください」などの露骨な誘導`;
+
+type Platform = 'threads' | 'x';
+
 /**
- * Gemini APIを使ってThreads投稿を生成する
+ * Gemini APIを使って投稿を生成する
  */
 export async function generatePost(options?: {
   topic?: string;
   avoidRepeat?: string[];
+  platform?: Platform;
 }): Promise<string> {
+  const platform = options?.platform ?? 'threads';
   const topic =
     options?.topic ??
     config.posting.topics[Math.floor(Math.random() * config.posting.topics.length)];
@@ -78,12 +115,17 @@ export async function generatePost(options?: {
       ? `\n\n以下のテーマはすでに最近使ったので避けてください:\n${options.avoidRepeat.join('\n')}`
       : '';
 
-  const prompt = `${SYSTEM_PROMPT}
+  const systemPrompt = platform === 'x' ? SYSTEM_PROMPT_X : SYSTEM_PROMPT_THREADS;
+  const platformLabel = platform === 'x' ? 'X（Twitter）' : 'Threads';
+  const charLimit = platform === 'x' ? '140文字以内（日本語）' : '500文字以内';
+
+  const prompt = `${systemPrompt}
 
 【トーン】
 ${TONE_DESCRIPTIONS[config.posting.tone]}
 
-テーマ「${topic}」について、Threadsに投稿するテキストを1つ生成してください。
+テーマ「${topic}」について、${platformLabel}に投稿するテキストを1つ生成してください。
+${charLimit}に収めてください。
 投稿文のみを返してください。前置きや説明は不要です。${avoidSection}`;
 
   const result = await model.generateContent(prompt);
@@ -96,15 +138,20 @@ ${TONE_DESCRIPTIONS[config.posting.tone]}
 export async function generateBestPost(options?: {
   topic?: string;
   candidates?: number;
+  platform?: Platform;
+  avoidRepeat?: string[];
 }): Promise<string> {
   const candidateCount = options?.candidates ?? 3;
+  const platform = options?.platform ?? 'threads';
   const topic =
     options?.topic ??
     config.posting.topics[Math.floor(Math.random() * config.posting.topics.length)];
 
   // 候補を並列生成
   const candidates = await Promise.all(
-    Array.from({ length: candidateCount }, () => generatePost({ topic })),
+    Array.from({ length: candidateCount }, () =>
+      generatePost({ topic, platform, avoidRepeat: options?.avoidRepeat }),
+    ),
   );
 
   // Gemini に最もバズりそうな投稿を選ばせる
