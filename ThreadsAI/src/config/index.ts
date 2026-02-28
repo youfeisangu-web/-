@@ -8,9 +8,9 @@ function required(key: string): string {
 }
 
 export const config = {
-  anthropic: {
-    apiKey: required('ANTHROPIC_API_KEY'),
-    model: 'claude-sonnet-4-6' as const,
+  gemini: {
+    apiKey: required('GEMINI_API_KEY'),
+    model: 'gemini-2.0-flash' as const,
   },
   threads: {
     userId: required('THREADS_USER_ID'),

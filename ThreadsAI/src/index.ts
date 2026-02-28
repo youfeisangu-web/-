@@ -10,7 +10,7 @@ async function main(): Promise<void> {
   const isPostNow = args.includes('--post-now');
 
   log('info', '=== Threads自動運用AI 起動 ===');
-  log('info', `モデル: ${config.anthropic.model}`);
+  log('info', `モデル: ${config.gemini.model}`);
   log('info', `トーン: ${config.posting.tone}`);
   log('info', `トピック: ${config.posting.topics.join(' / ')}`);
   log('info', `1日の投稿数: ${config.posting.postsPerDay}回`);
