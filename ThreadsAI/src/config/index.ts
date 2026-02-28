@@ -25,5 +25,6 @@ export const config = {
       .map(t => t.trim()),
     language: process.env.POST_LANGUAGE ?? 'Japanese',
     timezone: process.env.TIMEZONE ?? 'Asia/Tokyo',
+    billiaUrl: process.env.BILLIA_URL ?? '',
   },
 };

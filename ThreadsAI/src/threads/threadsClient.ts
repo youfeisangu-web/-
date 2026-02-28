@@ -32,15 +32,26 @@ export class ThreadsClient {
   }
 
   /**
+   * 指定投稿へのリプライ（2ステップ: コンテナ作成 → 公開）
+   */
+  async reply(replyToId: string, text: string): Promise<string> {
+    const containerId = await this.createContainer(text, replyToId);
+    await this.sleep(30_000);
+    const postId = await this.publish(containerId);
+    return postId;
+  }
+
+  /**
    * ステップ1: メディアコンテナを作成
    */
-  private async createContainer(text: string): Promise<string> {
+  private async createContainer(text: string, replyToId?: string): Promise<string> {
     const url = `${this.base}/${this.userId}/threads`;
     const res = await axios.post<CreateContainerResponse>(url, null, {
       params: {
         media_type: 'TEXT',
         text,
         access_token: this.token,
+        ...(replyToId ? { reply_to_id: replyToId } : {}),
       },
     });
     return res.data.id;

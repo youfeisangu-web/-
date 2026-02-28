@@ -32,6 +32,12 @@ export async function runPost(dryRun = false): Promise<void> {
     const postId = await threads.post(post);
     log('info', `投稿完了 ✓  ID: ${postId}`);
 
+    // Billia URL が設定されていればリプライで添付
+    if (config.posting.billiaUrl) {
+      await threads.reply(postId, config.posting.billiaUrl);
+      log('info', `リプライ完了 ✓  URL: ${config.posting.billiaUrl}`);
+    }
+
     // 直近のトピックを更新
     recentTopics.push(post.slice(0, 30));
     if (recentTopics.length > MAX_RECENT) recentTopics.shift();
