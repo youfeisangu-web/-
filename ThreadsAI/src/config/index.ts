@@ -10,7 +10,7 @@ function required(key: string): string {
 export const config = {
   gemini: {
     apiKey: required('GEMINI_API_KEY'),
-    model: 'gemini-2.0-flash' as const,
+    model: 'gemini-1.5-pro' as const,
   },
   threads: {
     userId: required('THREADS_USER_ID'),

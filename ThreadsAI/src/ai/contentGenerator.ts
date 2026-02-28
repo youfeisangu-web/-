@@ -2,7 +2,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config';
 
 const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
-const model = genAI.getGenerativeModel({ model: config.gemini.model });
+const model = genAI.getGenerativeModel({
+  model: config.gemini.model,
+  generationConfig: { temperature: 1.0, maxOutputTokens: 512 },
+});
 
 const TONE_DESCRIPTIONS = {
   casual: 'フレンドリーでカジュアル。友達に話しかけるような口調。絵文字も自然に使う。',
